@@ -93,7 +93,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceMo
                 <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white block font-semibold">Arusha Headquarters:</strong>
-                  <span>Njiro Complex, Block 4</span>
+                  <span>AICC, Kilimanjaro Building, Room 341</span>
                   <span className="block text-slate-500">Arusha, Tanzania</span>
                 </div>
               </div>

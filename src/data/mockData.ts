@@ -100,7 +100,7 @@ export const FEATURED_EQUIPMENT: EquipmentItem[] = [
     category: 'Diagnostic',
     manufacturer: 'Mindray Biomedical',
     model: 'Resona I9 Pro',
-    image: '/src/assets/images/mindray_resona_ultrasound_1791133914392.jpg',
+    image: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=800&auto=format&fit=crop',
     description: 'Breakthrough acoustic intelligence ultrasound platform with single-crystal matrix transducers and ZST+ technology for high-volume obstetrics, cardiology, and general radiology.',
     specifications: [
       '21.5-inch High-Resolution Frameless Medical Display',
@@ -117,7 +117,7 @@ export const FEATURED_EQUIPMENT: EquipmentItem[] = [
     category: 'Theatre',
     manufacturer: 'Mindray Medical',
     model: 'EX-65 Pro',
-    image: '/src/assets/images/operating_theatre_equipment_1791120372232.jpg',
+    image: 'https://images.unsplash.com/photo-1579684385127-1ef15d508118?q=80&w=800&auto=format&fit=crop',
     description: 'Precision anesthesia station with integrated ventilator, electronic flowmeters, anesthetic gas scavenging, and comprehensive patient monitoring for multi-specialty surgery.',
     specifications: [
       '12.1-inch Color Touchscreen with intuitive workflow',
@@ -134,7 +134,7 @@ export const FEATURED_EQUIPMENT: EquipmentItem[] = [
     category: 'Theatre',
     manufacturer: 'CoreMed Clinical Solutions',
     model: 'CSSD-P360',
-    image: '/src/assets/images/hero_operating_suite_1791133860838.jpg',
+    image: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?q=80&w=800&auto=format&fit=crop',
     description: 'High-capacity, double-door pass-through steam autoclave with built-in steam generator, micro-computer touch control, and cycle receipt printer for sterile processing departments.',
     specifications: [
       '360 Litres chamber volume (SUS316L medical stainless steel)',
@@ -151,7 +151,7 @@ export const FEATURED_EQUIPMENT: EquipmentItem[] = [
     category: 'Laboratory',
     manufacturer: 'Sysmex Corporation',
     model: 'XN-350 Compact',
-    image: '/src/assets/images/laboratory_hematology_analyzer_1791133935435.jpg',
+    image: 'https://images.unsplash.com/photo-1579165466741-7f35e4755660?q=80&w=800&auto=format&fit=crop',
     description: 'Compact 5-part differential hematology analyzer featuring fluorescence flow cytometry for high precision blood counts even with abnormal morphology.',
     specifications: [
       'Throughput: 60 samples per hour in whole blood mode',
@@ -168,7 +168,7 @@ export const FEATURED_EQUIPMENT: EquipmentItem[] = [
     category: 'MedicalGas',
     manufacturer: 'Oxair & CoreMed Systems',
     model: 'PSA-50HC Containerized',
-    image: '/src/assets/images/medical_gas_oxygen_manifold_1791133884278.jpg',
+    image: 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?q=80&w=800&auto=format&fit=crop',
     description: 'Turnkey containerized pressure swing adsorption (PSA) medical oxygen plant supplying 93% ± 3% purity clinical oxygen directly to hospital pipeline and cylinder filling ramps.',
     specifications: [
       'Output: 50 Nm³/hr (Equivalent to ~170 standard 50L cylinders/day)',
@@ -185,7 +185,7 @@ export const FEATURED_EQUIPMENT: EquipmentItem[] = [
     category: 'LifeSupport',
     manufacturer: 'Imtmedical / Vyaire',
     model: 'BV-1000-TZ',
-    image: '/src/assets/images/engineer_calibration_hospital_1791120360131.jpg',
+    image: 'https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=800&auto=format&fit=crop',
     description: 'High-performance turbine-driven ICU ventilator providing non-invasive and invasive ventilation for neonates, pediatric, and adult intensive care patients without compressed air wall feeds.',
     specifications: [
       'High-performance internal turbine (requires zero external compressed air)',
@@ -202,7 +202,7 @@ export const FEATURED_EQUIPMENT: EquipmentItem[] = [
     category: 'Diagnostic',
     manufacturer: 'Siemens Healthineers',
     model: 'Magnetom Altea 1.5T',
-    image: '/src/assets/images/siemens_mri_scanner_1791133923794.jpg',
+    image: 'https://images.unsplash.com/photo-1512758017271-d7b84c2113f1?q=80&w=800&auto=format&fit=crop',
     description: 'Advanced 70cm wide-bore 1.5T superconductive MRI scanner with BioMatrix technology for patient personalization and rapid diagnostic throughput.',
     specifications: [
       '70cm Open Bore with Quiet Suite acoustic reduction',
