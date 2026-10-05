@@ -14,7 +14,7 @@ import { HospitalTicket } from '../types';
 import { DEMO_TICKETS } from '../data/mockData';
 
 export interface DatabaseConfig {
-  provider: 'local_embedded' | 'postgresql' | 'supabase' | 'firebase' | 'rest_api';
+  provider: 'postgresql' | 'local_embedded' | 'supabase' | 'firebase' | 'rest_api';
   databaseName: string;
   connectionUri: string;
   apiKey?: string;
@@ -32,17 +32,73 @@ const STORAGE_KEYS = {
 };
 
 const DEFAULT_DB_CONFIG: DatabaseConfig = {
-  provider: 'local_embedded',
-  databaseName: 'coremed_biomedical_tz_db',
-  connectionUri: 'postgresql://coremed_admin:••••••••@tz-db-cluster-01.internal.coremed.tz:5432/coremed_hospital_os',
-  apiKey: 'cmt_live_sec_tz9948201',
-  status: 'ready',
-  lastSync: 'Synced with local cache',
+  provider: 'postgresql',
+  databaseName: 'postgres',
+  connectionUri: 'postgres://postgres:uNmmwjzaeJ5Np9P@169.58.108.190:5434/postgres?sslmode=require',
+  apiKey: 'uNmmwjzaeJ5Np9P',
+  status: 'connected',
+  lastSync: 'Live PostgreSQL (169.58.108.190:5434)',
   autoSync: true,
 };
 
 class DatabaseService {
+  // --- TEST POSTGRESQL LIVE CONNECTION ---
+  async testConnection(): Promise<{ success: boolean; latencyMs: number; message: string; data?: any }> {
+    try {
+      const response = await fetch('/api/db/status');
+      const data = await response.json();
+      if (response.ok && data.success) {
+        return {
+          success: true,
+          latencyMs: data.latencyMs || 42,
+          message: `Connected to PostgreSQL cluster at ${data.host} (${data.database}). Live table records loaded.`,
+          data
+        };
+      } else {
+        return {
+          success: false,
+          latencyMs: data.latencyMs || 0,
+          message: data.error || 'Failed to connect to PostgreSQL database.',
+          data
+        };
+      }
+    } catch (err) {
+      return {
+        success: false,
+        latencyMs: 0,
+        message: (err as Error).message || 'Network error connecting to backend database proxy.'
+      };
+    }
+  }
+
+  // --- RE-SEED / FORCE UPLOAD POSTGRESQL ---
+  async reseedPostgresDatabase(): Promise<{ success: boolean; message: string }> {
+    try {
+      const response = await fetch('/api/db/seed', { method: 'POST' });
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      return { success: false, message: (err as Error).message };
+    }
+  }
+
   // --- FACILITIES / HOSPITALS ---
+  async fetchLiveFacilities(): Promise<HospitalFacility[]> {
+    try {
+      const response = await fetch('/api/facilities');
+      if (response.ok) {
+        const live = await response.json();
+        if (Array.isArray(live) && live.length > 0) {
+          this.saveFacilities(live);
+          return live;
+        }
+      }
+    } catch (e) {
+      console.warn('Backend fetch failed, using local cache:', e);
+    }
+    return this.getFacilities();
+  }
+
   getFacilities(): HospitalFacility[] {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.FACILITIES);
@@ -55,7 +111,6 @@ class DatabaseService {
     } catch (e) {
       console.warn('Error reading facilities from localStorage:', e);
     }
-    // Fallback to default initial facilities
     this.saveFacilities(DEMO_FACILITIES);
     return DEMO_FACILITIES;
   }
@@ -79,10 +134,34 @@ class DatabaseService {
     };
     const updated = [fullFacility, ...facilities];
     this.saveFacilities(updated);
+
+    // Sync to PostgreSQL backend
+    fetch('/api/facilities', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fullFacility)
+    }).catch(err => console.warn('Could not sync facility to Postgres:', err));
+
     return fullFacility;
   }
 
   // --- REGISTERED EQUIPMENT / DEVICES ---
+  async fetchLiveEquipment(): Promise<RegisteredEquipment[]> {
+    try {
+      const response = await fetch('/api/equipment');
+      if (response.ok) {
+        const live = await response.json();
+        if (Array.isArray(live) && live.length > 0) {
+          this.saveEquipment(live);
+          return live;
+        }
+      }
+    } catch (e) {
+      console.warn('Backend fetch failed, using local cache:', e);
+    }
+    return this.getEquipment();
+  }
+
   getEquipment(): RegisteredEquipment[] {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.EQUIPMENT);
@@ -107,50 +186,77 @@ class DatabaseService {
     }
   }
 
-  addEquipment(device: Omit<RegisteredEquipment, 'id'> & { id?: string }): RegisteredEquipment {
+  addEquipment(newEq: Omit<RegisteredEquipment, 'id'> & { id?: string }): RegisteredEquipment {
     const equipment = this.getEquipment();
-    const id = device.id || `EQ-${Date.now().toString(36).toUpperCase()}`;
-    const fullDevice: RegisteredEquipment = {
-      ...device,
+    const id = newEq.id || `eq-${Date.now().toString(36)}`;
+    const fullEq: RegisteredEquipment = {
+      ...newEq,
       id,
+      calibrationStatus: newEq.calibrationStatus || 'Valid',
+      operationalStatus: newEq.operationalStatus || 'Operational',
+      uptimePercentage: newEq.uptimePercentage || 99.4,
     };
-    const updated = [fullDevice, ...equipment];
+    const updated = [fullEq, ...equipment];
     this.saveEquipment(updated);
 
-    // Also update facility activeEquipmentCount
-    const facilities = this.getFacilities();
-    const facilityIdx = facilities.findIndex((f) => f.id === device.facilityId);
-    if (facilityIdx >= 0) {
-      facilities[facilityIdx] = {
-        ...facilities[facilityIdx],
-        activeEquipmentCount: (facilities[facilityIdx].activeEquipmentCount || 0) + 1,
-      };
-      this.saveFacilities(facilities);
-    }
+    // Sync to PostgreSQL backend
+    fetch('/api/equipment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fullEq)
+    }).catch(err => console.warn('Could not sync equipment to Postgres:', err));
 
-    return fullDevice;
+    return fullEq;
   }
 
-  deleteEquipment(deviceId: string): void {
+  updateEquipment(id: string, updates: Partial<RegisteredEquipment>): RegisteredEquipment | null {
     const equipment = this.getEquipment();
-    const toRemove = equipment.find((e) => e.id === deviceId);
-    const updated = equipment.filter((e) => e.id !== deviceId);
-    this.saveEquipment(updated);
+    const idx = equipment.findIndex((e) => e.id === id);
+    if (idx === -1) return null;
 
-    if (toRemove?.facilityId) {
-      const facilities = this.getFacilities();
-      const facilityIdx = facilities.findIndex((f) => f.id === toRemove.facilityId);
-      if (facilityIdx >= 0 && facilities[facilityIdx].activeEquipmentCount > 0) {
-        facilities[facilityIdx] = {
-          ...facilities[facilityIdx],
-          activeEquipmentCount: facilities[facilityIdx].activeEquipmentCount - 1,
-        };
-        this.saveFacilities(facilities);
-      }
-    }
+    const updatedEq = { ...equipment[idx], ...updates };
+    equipment[idx] = updatedEq;
+    this.saveEquipment(equipment);
+
+    fetch('/api/equipment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updatedEq)
+    }).catch(err => console.warn('Could not sync update to Postgres:', err));
+
+    return updatedEq;
   }
 
-  // --- TICKETS / SLA WORK ORDERS ---
+  deleteEquipment(id: string): boolean {
+    const equipment = this.getEquipment();
+    const filtered = equipment.filter((e) => e.id !== id);
+    if (filtered.length !== equipment.length) {
+      this.saveEquipment(filtered);
+      fetch(`/api/equipment/${id}`, { method: 'DELETE' }).catch(err =>
+        console.warn('Could not delete from Postgres:', err)
+      );
+      return true;
+    }
+    return false;
+  }
+
+  // --- TICKETS / SLA DISPATCH ---
+  async fetchLiveTickets(): Promise<HospitalTicket[]> {
+    try {
+      const response = await fetch('/api/tickets');
+      if (response.ok) {
+        const live = await response.json();
+        if (Array.isArray(live) && live.length > 0) {
+          this.saveTickets(live);
+          return live;
+        }
+      }
+    } catch (e) {
+      console.warn('Backend fetch failed, using local cache:', e);
+    }
+    return this.getTickets();
+  }
+
   getTickets(): HospitalTicket[] {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.TICKETS);
@@ -175,25 +281,77 @@ class DatabaseService {
     }
   }
 
-  addTicket(ticket: HospitalTicket): void {
+  addTicket(newTicket: Omit<HospitalTicket, 'ticketId'> & { ticketId?: string }): HospitalTicket {
     const tickets = this.getTickets();
-    const updated = [ticket, ...tickets];
+    const ticketId = newTicket.ticketId || `CMT-SLA-${Math.floor(10000 + Math.random() * 90000)}`;
+    const fullTicket: HospitalTicket = {
+      ...newTicket,
+      ticketId,
+      status: newTicket.status || 'Dispatched',
+      dateReported: newTicket.dateReported || new Date().toISOString().split('T')[0],
+      assignedEngineer: newTicket.assignedEngineer || 'Eng. Kelvin Lyimo, B.Sc. Biomedical',
+      estimatedArrival: newTicket.estimatedArrival || 'Under 4 Hours',
+    };
+    const updated = [fullTicket, ...tickets];
     this.saveTickets(updated);
+
+    // Sync to PostgreSQL backend
+    fetch('/api/tickets', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fullTicket)
+    }).catch(err => console.warn('Could not sync ticket to Postgres:', err));
+
+    return fullTicket;
   }
 
-  // --- SMS LOGS ---
+  updateTicketStatus(ticketId: string, status: HospitalTicket['status']): HospitalTicket | null {
+    const tickets = this.getTickets();
+    const idx = tickets.findIndex((t) => t.ticketId === ticketId);
+    if (idx === -1) return null;
+
+    tickets[idx].status = status;
+    this.saveTickets(tickets);
+
+    fetch(`/api/tickets/${ticketId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    }).catch(err => console.warn('Could not sync status to Postgres:', err));
+
+    return tickets[idx];
+  }
+
+  // --- SMS & AUDIT LOGS ---
+  async fetchLiveSmsLogs(): Promise<SmsNotification[]> {
+    try {
+      const response = await fetch('/api/sms-logs');
+      if (response.ok) {
+        const live = await response.json();
+        if (Array.isArray(live) && live.length > 0) {
+          this.saveSmsLogs(live);
+          return live;
+        }
+      }
+    } catch (e) {
+      console.warn('Backend fetch failed, using local cache:', e);
+    }
+    return this.getSmsLogs();
+  }
+
   getSmsLogs(): SmsNotification[] {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.SMS_LOGS);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed)) {
+        if (Array.isArray(parsed) && parsed.length > 0) {
           return parsed;
         }
       }
     } catch (e) {
       console.warn('Error reading SMS logs from localStorage:', e);
     }
+    this.saveSmsLogs(INITIAL_SMS_LOGS);
     return INITIAL_SMS_LOGS;
   }
 
@@ -203,6 +361,25 @@ class DatabaseService {
     } catch (e) {
       console.warn('Error saving SMS logs to localStorage:', e);
     }
+  }
+
+  addSmsLog(sms: Omit<SmsNotification, 'id'> & { id?: string }): SmsNotification {
+    const logs = this.getSmsLogs();
+    const id = sms.id || `SMS-${Date.now()}`;
+    const fullSms: SmsNotification = {
+      ...sms,
+      id,
+    };
+    const updated = [fullSms, ...logs];
+    this.saveSmsLogs(updated);
+
+    fetch('/api/sms-logs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fullSms)
+    }).catch(err => console.warn('Could not sync SMS log to Postgres:', err));
+
+    return fullSms;
   }
 
   // --- DATABASE CONNECTION CONFIG ---
@@ -234,6 +411,8 @@ class DatabaseService {
         version: '2.6 Enterprise',
         exportDate: new Date().toISOString(),
         tanzania_region: 'East Africa / Tanzania Mainland & Zanzibar',
+        database_host: '169.58.108.190:5434',
+        database_engine: 'PostgreSQL 15+ (Production)'
       },
       dbConfig: this.getDbConfig(),
       facilities: this.getFacilities(),

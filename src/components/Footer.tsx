@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrandLogo } from './BrandLogo';
-import { Phone, Mail, MapPin, ShieldCheck, Clock, ExternalLink } from 'lucide-react';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { useLanguage } from '../context/LanguageContext';
+import { Phone, Mail, MapPin, ShieldCheck, ExternalLink } from 'lucide-react';
 
 interface FooterProps {
   onOpenLogin: () => void;
@@ -8,6 +10,8 @@ interface FooterProps {
 }
 
 export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceModal }) => {
+  const { t } = useLanguage();
+
   return (
     <footer id="contact" className="bg-[#071B2D] text-slate-300 pt-16 pb-12 border-t border-slate-800">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -17,7 +21,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceMo
             <BrandLogo size="md" theme="dark" />
 
             <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
-              Tanzania's certified partner for diagnostic imaging, operating theatre systems, turnkey hospital medical gas pipeline networks, and accredited biomedical maintenance SLAs.
+              {t.footer.tagline}
             </p>
 
             <div className="pt-2 space-y-1.5 text-xs text-slate-400">
@@ -30,37 +34,42 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceMo
                 <span>NeST Vendor Registered · TMDA Certified</span>
               </div>
             </div>
+
+            {/* Language Switcher in Footer */}
+            <div className="pt-3">
+              <LanguageSwitcher variant="footer" />
+            </div>
           </div>
 
           {/* Col 2: Services Quick Links */}
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-              Biomedical Services
+              {t.footer.services}
             </h4>
             <ul className="space-y-2 text-xs text-slate-400">
               <li>
-                <a href="#services" className="hover:text-emerald-400 transition-colors">
-                  Diagnostic Ultrasound & Radiology
+                <a href="#departments" className="hover:text-emerald-400 transition-colors">
+                  {t.departments.dept1Title}
                 </a>
               </li>
               <li>
-                <a href="#services" className="hover:text-emerald-400 transition-colors">
-                  Hospital Equipment Calibration & Testing
+                <a href="#departments" className="hover:text-emerald-400 transition-colors">
+                  {t.departments.dept3Title}
                 </a>
               </li>
               <li>
-                <a href="#services" className="hover:text-emerald-400 transition-colors">
-                  Clinical Laboratory Supplies & Analyzers
+                <a href="#departments" className="hover:text-emerald-400 transition-colors">
+                  {t.departments.dept5Title}
                 </a>
               </li>
               <li>
-                <a href="#services" className="hover:text-emerald-400 transition-colors">
-                  Operating Theatre & Autoclave Solutions
+                <a href="#departments" className="hover:text-emerald-400 transition-colors">
+                  {t.departments.dept6Title}
                 </a>
               </li>
               <li>
-                <a href="#services" className="hover:text-emerald-400 transition-colors">
-                  Medical Gas Pipeline Systems (MGPS)
+                <a href="#departments" className="hover:text-emerald-400 transition-colors">
+                  {t.departments.dept8Title}
                 </a>
               </li>
               <li>
@@ -68,7 +77,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceMo
                   onClick={onOpenMaintenanceModal}
                   className="text-emerald-400 font-semibold hover:underline mt-1 cursor-pointer"
                 >
-                  Emergency Repair Dispatch
+                  {t.departments.emergencySla}
                 </button>
               </li>
             </ul>
@@ -84,7 +93,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceMo
                 <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
                   <strong className="text-white block font-semibold">Arusha Headquarters:</strong>
-                  <span>AICC Kilimanjaro Hall, Room 341</span>
+                  <span>Njiro Complex, Block 4</span>
                   <span className="block text-slate-500">Arusha, Tanzania</span>
                 </div>
               </div>
@@ -92,8 +101,8 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceMo
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                 <div>
-                  <strong className="text-white block font-semibold">Dar es Salaam Spares Hub:</strong>
-                  <span>Ali Hassan Mwinyi Rd, Kijitonyama Depot</span>
+                  <strong className="text-white block font-semibold">Dar es Salaam Depot:</strong>
+                  <span>Mikocheni Light Industrial Zone, Depot 12</span>
                   <span className="block text-slate-500">Dar es Salaam, Tanzania</span>
                 </div>
               </div>
@@ -103,7 +112,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceMo
           {/* Col 4: Rapid Contact & Login */}
           <div className="lg:col-span-2 space-y-3">
             <h4 className="text-xs font-bold uppercase tracking-wider text-white">
-              Direct Contact
+              {t.nav.contact}
             </h4>
             <div className="space-y-2.5 text-xs text-slate-400">
               <a
@@ -135,7 +144,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceMo
                   onClick={onOpenLogin}
                   className="w-full py-2 px-3 text-xs font-semibold text-slate-200 bg-white/10 hover:bg-white/20 rounded-lg border border-white/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <span>Portal Login</span>
+                  <span>{t.nav.portalLogin}</span>
                   <ExternalLink className="w-3 h-3 text-emerald-300" />
                 </button>
               </div>
@@ -145,14 +154,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenLogin, onOpenMaintenanceMo
 
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
-          <p>© {new Date().getFullYear()} COREMED TECH (Biomedical Solutions) Ltd. All Rights Reserved. Regulated in Tanzania.</p>
+          <p>© {new Date().getFullYear()} {t.footer.rights}</p>
           <div className="flex items-center gap-6">
             <a href="#compliance" className="hover:text-slate-300 transition-colors">
-              TMDA Compliance Policy
+              TMDA Compliance
             </a>
             <span aria-hidden="true">·</span>
             <a href="#compliance" className="hover:text-slate-300 transition-colors">
-              NeST Procurement Standards
+              ISO 17025 Protocols
             </a>
             <span aria-hidden="true">·</span>
             <a href="#compliance" className="hover:text-slate-300 transition-colors">

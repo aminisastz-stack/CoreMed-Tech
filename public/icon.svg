@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#071b2f"/>
+      <stop offset="50%" stop-color="#0F4C81"/>
+      <stop offset="100%" stop-color="#0a3258"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#34D399"/>
+      <stop offset="100%" stop-color="#10B981"/>
+    </linearGradient>
+    <linearGradient id="cyanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0F4C81"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Background rounded squircle -->
+  <rect width="512" height="512" rx="100" fill="url(#bgGrad)" />
+  <rect x="12" y="12" width="488" height="488" rx="88" fill="none" stroke="#38BDF8" stroke-width="4" stroke-opacity="0.3"/>
+
+  <!-- Pulse / Hexagon background pattern -->
+  <circle cx="256" cy="256" r="170" fill="none" stroke="#10B981" stroke-width="3" stroke-dasharray="8 8" stroke-opacity="0.25"/>
+
+  <!-- Central Medical Cross + Tech Nodes -->
+  <g transform="translate(256, 256)">
+    <!-- Tech Cross Backing -->
+    <rect x="-32" y="-120" width="64" height="240" rx="20" fill="url(#emeraldGrad)" filter="url(#glow)"/>
+    <rect x="-120" y="-32" width="240" height="64" rx="20" fill="url(#emeraldGrad)" filter="url(#glow)"/>
+
+    <!-- Inner Blue Core -->
+    <circle cx="0" cy="0" r="54" fill="#071b2f" stroke="#ffffff" stroke-width="5"/>
+
+    <!-- Pulse Line in Center -->
+    <path d="M-40,0 L-20,0 L-10,-24 L5,24 L15,-12 L25,0 L40,0" fill="none" stroke="#34D399" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+
+    <!-- Corner Biomedical Dots / Sensors -->
+    <circle cx="-75" cy="-75" r="9" fill="#38BDF8"/>
+    <circle cx="75" cy="-75" r="9" fill="#38BDF8"/>
+    <circle cx="-75" cy="75" r="9" fill="#38BDF8"/>
+    <circle cx="75" cy="75" r="9" fill="#38BDF8"/>
+  </g>
+</svg>

@@ -239,17 +239,21 @@ export const PortalSettings: React.FC<PortalSettingsProps> = ({
     setTimeout(() => setDbSuccessMsg(null), 3500);
   };
 
-  const handleTestDbPing = () => {
+  const handleTestDbPing = async () => {
     setIsTestingDbPing(true);
     setDbPingResult(null);
-    setTimeout(() => {
+    try {
+      const result = await databaseService.testConnection();
+      setIsTestingDbPing(false);
+      setDbPingResult(result);
+    } catch (err) {
       setIsTestingDbPing(false);
       setDbPingResult({
-        success: true,
-        latencyMs: Math.floor(18 + Math.random() * 12),
-        message: `Connection established to ${dbConfigForm.databaseName} via ${dbConfigForm.provider.toUpperCase()}. Cluster response nominal.`
+        success: false,
+        latencyMs: 0,
+        message: (err as Error).message || 'Connection failed.'
       });
-    }, 700);
+    }
   };
 
   const handleExportDatabase = () => {
@@ -394,7 +398,7 @@ export const PortalSettings: React.FC<PortalSettingsProps> = ({
         </div>
 
         {/* 7 Distinct Classified Menu Buttons */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-2 pt-2 border-t border-slate-100">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-1.5 sm:gap-2 pt-2 border-t border-slate-100">
           {SETTINGS_CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             const isActive = currentMenu === cat.id;
@@ -403,38 +407,38 @@ export const PortalSettings: React.FC<PortalSettingsProps> = ({
                 key={cat.id}
                 type="button"
                 onClick={() => handleSelectMenu(cat.id)}
-                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-2 ${
+                className={`p-2.5 sm:p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col justify-between gap-1.5 sm:gap-2 ${
                   isActive
                     ? 'bg-[#0F4C81] text-white border-[#0F4C81] shadow-sm'
                     : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200 hover:border-slate-300'
                 }`}
               >
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-center justify-between w-full gap-1">
                   <div
-                    className={`w-7 h-7 rounded-xl flex items-center justify-center ${
+                    className={`w-6 h-6 sm:w-7 sm:h-7 rounded-xl flex items-center justify-center shrink-0 ${
                       isActive ? 'bg-white/20 text-white' : 'bg-white text-[#0F4C81] border border-slate-200 shadow-2xs'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                   </div>
                   <span
-                    className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
+                    className={`text-[8px] sm:text-[9px] font-bold px-1 sm:px-1.5 py-0.5 rounded-full truncate ${
                       isActive ? 'bg-white/20 text-white' : cat.badgeColor
                     }`}
                   >
                     {cat.badge}
                   </span>
                 </div>
-                <div>
-                  <span className="text-xs font-bold block truncate leading-tight">
-                    {cat.label}
+                <div className="min-w-0">
+                  <span className="text-[11px] sm:text-xs font-bold block truncate leading-tight">
+                    {cat.shortLabel}
                   </span>
                   <span
-                    className={`text-[10px] block truncate mt-0.5 ${
+                    className={`text-[9px] sm:text-[10px] block truncate mt-0.5 ${
                       isActive ? 'text-blue-100' : 'text-slate-400'
                     }`}
                   >
-                    {cat.shortLabel}
+                    {cat.label}
                   </span>
                 </div>
               </button>

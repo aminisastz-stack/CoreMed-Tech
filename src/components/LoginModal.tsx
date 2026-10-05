@@ -284,6 +284,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     return () => clearInterval(interval);
   }, [isOpen, isLoggedIn]);
 
+  // Fetch live rows from PostgreSQL database when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      databaseService.fetchLiveFacilities().then(setFacilitiesList);
+      databaseService.fetchLiveEquipment().then(setEquipmentList);
+      databaseService.fetchLiveTickets().then(setTicketsList);
+      databaseService.fetchLiveSmsLogs().then(setSmsLogs);
+    }
+  }, [isOpen]);
+
   // Handle Sensor Gateway Ping Test
   const handleRunGatewayPing = async () => {
     setIsTestingGatewayPing(true);
@@ -850,18 +860,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 </div>
 
                 {/* Quick App Actions in Header */}
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                   <button
                     type="button"
                     onClick={() => {
                       setDeviceTargetFacilityId(selectedFacilityId);
                       setIsRegisterDeviceOpen(true);
                     }}
-                    className="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] sm:text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer shrink-0"
                     title="Add another medical device to this hospital"
                   >
-                    <Plus className="w-4 h-4" />
-                    <span>+ Add Device</span>
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>+ Device</span>
                   </button>
                   <button
                     type="button"
@@ -869,23 +879,24 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                       setNewTicketFormOpen(true);
                       setActiveTab('tickets');
                     }}
-                    className="px-3.5 py-2 bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                    className="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-rose-600 hover:bg-rose-500 text-white text-[11px] sm:text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1 cursor-pointer shrink-0"
                   >
-                    <AlertTriangle className="w-4 h-4" />
-                    <span>Log Breakdown SLA</span>
+                    <AlertTriangle className="w-3.5 h-3.5" />
+                    <span className="hidden xs:inline">Log Breakdown </span>
+                    <span>SLA</span>
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleSimulateScan('SN-RES-948102')}
-                    className="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-xl border border-white/20 transition-colors flex items-center gap-1.5 cursor-pointer"
+                    onClick={() => setActiveTab('scanner')}
+                    className="px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white/10 hover:bg-white/20 text-white text-[11px] sm:text-xs font-semibold rounded-xl border border-white/20 transition-colors flex items-center gap-1 cursor-pointer shrink-0"
                   >
-                    <QrCode className="w-4 h-4 text-emerald-300" />
-                    <span>Scan QR Tag</span>
+                    <QrCode className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Scan</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => setActiveTab('settings')}
-                    className={`p-2 rounded-xl transition-colors cursor-pointer ${
+                    className={`p-1.5 sm:p-2 rounded-xl transition-colors cursor-pointer shrink-0 ${
                       activeTab === 'settings'
                         ? 'bg-white text-[#0F4C81]'
                         : 'bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white'
@@ -897,7 +908,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                   <button
                     type="button"
                     onClick={() => setIsLoggedIn(false)}
-                    className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition-colors cursor-pointer"
+                    className="p-1.5 sm:p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 hover:text-white transition-colors cursor-pointer shrink-0"
                     title="Sign Out"
                   >
                     <LogOut className="w-4 h-4" />
@@ -906,8 +917,45 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               </div>
             </div>
 
+            {/* Desktop & Tablet Top Navigation Tab Bar */}
+            <div className="hidden md:flex items-center justify-between px-6 py-2.5 bg-slate-100 border-b border-slate-200/90 text-xs font-semibold shrink-0">
+              <div className="flex items-center gap-1">
+                {[
+                  { id: 'home' as const, label: 'Dashboard Home', icon: Home },
+                  { id: 'assets' as const, label: 'Hospital Assets', icon: Activity },
+                  { id: 'telemetry' as const, label: 'IoT SCADA Telemetry', icon: Gauge },
+                  { id: 'scanner' as const, label: 'Camera QR Scanner', icon: QrCode },
+                  { id: 'tickets' as const, label: 'SLA Work Orders', icon: AlertTriangle },
+                  { id: 'documents' as const, label: 'NeST Tenders', icon: FileText },
+                  ...(loggedInUser?.isStaff ? [{ id: 'settings' as const, label: 'Portal Settings', icon: Settings }] : [])
+                ].map((tab) => {
+                  const Icon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer ${
+                        isActive
+                          ? 'bg-[#0F4C81] text-white shadow-xs'
+                          : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/70'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <span className="text-[11px] font-mono text-slate-500">
+                🏥 {currentFacility.name.split(' ')[0]} ({currentFacility.region})
+              </span>
+            </div>
+
             {/* Scrollable Main App Viewport */}
-            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 pb-20 sm:pb-8">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 pb-24 md:pb-8">
               {/* TAB 1: MODERN APP DASHBOARD / HOME (Like "Hi, James!" Screen) */}
               {activeTab === 'home' && (
                 <div className="max-w-6xl mx-auto space-y-6">
@@ -1868,8 +1916,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               )}
             </div>
 
-            {/* Mobile Fixed Bottom Navigation Bar (Matching Modern App Screen Navigation Pattern) */}
-            <div className="sticky bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 py-2 px-3 shadow-lg">
+            {/* Mobile Fixed Bottom Navigation Bar (Shown on Mobile, hidden on Tablet/Desktop where top tab bar is active) */}
+            <div className="md:hidden sticky bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/90 py-1.5 px-2 shadow-lg safe-bottom">
               <div className={`max-w-md mx-auto grid ${loggedInUser?.isStaff ? 'grid-cols-7' : 'grid-cols-6'} gap-1 text-center`}>
                 <button
                   type="button"

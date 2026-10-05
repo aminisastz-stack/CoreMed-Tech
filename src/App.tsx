@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { ServicesGrid } from './components/ServicesGrid';
-import { CredibilityStats } from './components/CredibilityStats';
-import { AboutSection } from './components/AboutSection';
+import { DepartmentsSection } from './components/DepartmentsSection';
+import { HospitalStatsSplit } from './components/HospitalStatsSplit';
+import { FeaturedEmergencySplit } from './components/FeaturedEmergencySplit';
+import { WhyChooseUs } from './components/WhyChooseUs';
 import { EquipmentCatalog } from './components/EquipmentCatalog';
-import { TestimonialsSection } from './components/TestimonialsSection';
-import { CallToActionBanner } from './components/CallToActionBanner';
+import { TestimonialAndBookingSplit } from './components/TestimonialAndBookingSplit';
+import { BlogSection } from './components/BlogSection';
 import { Footer } from './components/Footer';
 import { LoginModal } from './components/LoginModal';
 import { MaintenanceSLAModal } from './components/MaintenanceSLAModal';
 import { ChatbotAndWhatsAppWidget } from './components/ChatbotAndWhatsAppWidget';
-import { ServiceItem } from './types';
+import { OfflineIndicator } from './components/OfflineIndicator';
 
 export default function App() {
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -30,11 +31,6 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
-  const handleOpenMaintenanceWithCategory = (service: ServiceItem) => {
-    setSelectedServiceForSLA(service.title);
-    setIsMaintenanceOpen(true);
-  };
-
   const scrollToCatalog = () => {
     const el = document.getElementById('equipment');
     if (el) {
@@ -43,8 +39,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col text-slate-800 antialiased">
-      {/* Navigation Bar */}
+    <div className="min-h-screen bg-white flex flex-col text-slate-800 antialiased font-sans">
+      {/* 1. Header & Navigation matching reference */}
       <Navbar
         onOpenLogin={() => setIsLoginOpen(true)}
         onOpenMaintenanceModal={() => {
@@ -54,9 +50,9 @@ export default function App() {
         onOpenCatalog={scrollToCatalog}
       />
 
-      {/* Main Landing Page Flow */}
+      {/* Main Landing Page Flow exactly mirroring the reference design */}
       <main className="flex-1">
-        {/* Hero Section */}
+        {/* 2. Hero Section: "Expert Care for a Healthier Tomorrow" */}
         <Hero
           onOpenMaintenanceModal={() => {
             setSelectedServiceForSLA('');
@@ -65,21 +61,41 @@ export default function App() {
           onScrollToCatalog={scrollToCatalog}
         />
 
-        {/* 5 Core Service Cards Grid */}
-        <ServicesGrid onRequestService={handleOpenMaintenanceWithCategory} />
+        {/* 3. "Our Departments" 8 Pastel Category Cards Grid */}
+        <DepartmentsSection
+          onOpenMaintenanceModal={() => {
+            setSelectedServiceForSLA('');
+            setIsMaintenanceOpen(true);
+          }}
+          onOpenCatalog={scrollToCatalog}
+        />
 
-        {/* Credibility & Compliance Bar (BRELA, NeST, Dar Spares, Stats) */}
-        <CredibilityStats />
-
-        {/* About CoreMed Tech Section */}
-        <AboutSection
+        {/* 4. "A Hospital Built Around You" Architecture Photo + 4 Big Stat Counters */}
+        <HospitalStatsSplit
           onOpenMaintenanceModal={() => {
             setSelectedServiceForSLA('');
             setIsMaintenanceOpen(true);
           }}
         />
 
-        {/* Equipment Catalog & Inquiry */}
+        {/* 5. Two Split Featured Cards: "Experienced Doctors" + "Emergency Care When You Need It Most" */}
+        <FeaturedEmergencySplit
+          onOpenMaintenanceModal={() => {
+            setSelectedServiceForSLA('');
+            setIsMaintenanceOpen(true);
+          }}
+          onOpenLogin={() => setIsLoginOpen(true)}
+        />
+
+        {/* 6. "Why Choose COREMED TECH" 4-Column Feature Row */}
+        <WhyChooseUs
+          onOpenMaintenanceModal={() => {
+            setSelectedServiceForSLA('');
+            setIsMaintenanceOpen(true);
+          }}
+        />
+
+        {/* 7. Clinical Grade Equipment Supply & Quotation Catalog */}
         <EquipmentCatalog
           onOpenMaintenanceModal={() => {
             setSelectedServiceForSLA('');
@@ -87,11 +103,16 @@ export default function App() {
           }}
         />
 
-        {/* Testimonials from Tanzanian Hospital Leaders */}
-        <TestimonialsSection />
+        {/* 8. "Real Stories, Real Impact" Testimonial Carousel + "Book Your Appointment Today" Card */}
+        <TestimonialAndBookingSplit
+          onOpenMaintenanceModal={() => {
+            setSelectedServiceForSLA('');
+            setIsMaintenanceOpen(true);
+          }}
+        />
 
-        {/* High-Contrast Conversion CTA Banner */}
-        <CallToActionBanner
+        {/* 9. "Latest from Our Blog" 3 Article Cards */}
+        <BlogSection
           onOpenMaintenanceModal={() => {
             setSelectedServiceForSLA('');
             setIsMaintenanceOpen(true);
@@ -99,7 +120,7 @@ export default function App() {
         />
       </main>
 
-      {/* Corporate Footer */}
+      {/* 10. Corporate Footer */}
       <Footer
         onOpenLogin={() => setIsLoginOpen(true)}
         onOpenMaintenanceModal={() => {
@@ -121,13 +142,16 @@ export default function App() {
         initialServiceCategory={selectedServiceForSLA}
       />
 
-      {/* Fixed Floating AI Chatbot & WhatsApp Widget */}
+      {/* Floating AI Chatbot & WhatsApp Widget */}
       <ChatbotAndWhatsAppWidget
         onOpenMaintenanceModal={() => {
           setSelectedServiceForSLA('');
           setIsMaintenanceOpen(true);
         }}
       />
+
+      {/* Offline Connectivity Notification Banner for Remote Clinics */}
+      <OfflineIndicator />
     </div>
   );
 }

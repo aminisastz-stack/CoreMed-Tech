@@ -1,6 +1,6 @@
 {
   "name": "COREMED TECH (Biomedical Solutions)",
   "description": "Premier biomedical engineering, hospital equipment calibration, diagnostic systems, and clinical infrastructure solutions in Tanzania.",
-  "requestFramePermissions": [],
+  "requestFramePermissions": ["CAMERA"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }
